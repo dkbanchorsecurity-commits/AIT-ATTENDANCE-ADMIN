@@ -816,12 +816,12 @@
 
             courses.forEach(course => {
                 const lecturer = lecturers.find(l => l.id === course.lecturerId);
-                const lecturerName = lecturer ? lecturer.name : '<span class="text-red-500">Unassigned</span>';
+                const lecturerName = lecturer ? toTitleCase(lecturer.name) : '<span class="text-red-500">Unassigned</span>';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="px-6 py-4 border-b border-slate-100 font-medium text-slate-800 whitespace-nowrap">${course.code.toUpperCase()}</td>
-                    <td class="px-6 py-4 border-b border-slate-100 text-slate-600 whitespace-nowrap">${course.name}</td>
+                    <td class="px-6 py-4 border-b border-slate-100 text-slate-600 whitespace-nowrap">${toTitleCase(course.name)}</td>
                     <td class="px-6 py-4 border-b border-slate-100 whitespace-nowrap">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-user text-slate-400 text-xs"></i>
@@ -847,11 +847,11 @@
                 tr.innerHTML = `
                     <td class="px-6 py-4 border-b border-slate-100 whitespace-nowrap">
                         <div class="flex items-center gap-3">
-                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(lecturer.name)}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full flex-shrink-0">
-                            <span class="font-medium text-slate-800">${lecturer.name}</span>
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(toTitleCase(lecturer.name))}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full flex-shrink-0">
+                            <span class="font-medium text-slate-800">${toTitleCase(lecturer.name)}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 border-b border-slate-100 text-slate-600 whitespace-nowrap">${lecturer.dept}</td>
+                    <td class="px-6 py-4 border-b border-slate-100 text-slate-600 whitespace-nowrap">${toTitleCase(lecturer.dept)}</td>
                     <td class="px-6 py-4 border-b border-slate-100 text-slate-600 whitespace-nowrap">${lecturer.email}</td>
                     <td class="px-6 py-4 border-b border-slate-100 text-right whitespace-nowrap">
                         <button class="text-blue-600 hover:text-blue-800 mr-4 transition-colors p-2" onclick="editLecturer('${lecturer.id}')"><i class="fa-solid fa-pen"></i></button>
@@ -904,7 +904,7 @@
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${toTitleCase(student.name)}</td>
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${student.level}</td>
                         <td class="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">${student.courseCode.toUpperCase()}</td>
-                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${student.courseName}</td>
+                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${toTitleCase(student.courseName)}</td>
                         <td class="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">${streamDisplay}</td>
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${student.date}</td>
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${student.time}</td>
@@ -955,7 +955,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">${record.courseCode.toUpperCase()}</td>
-                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${record.courseName}</td>
+                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${toTitleCase(record.courseName)}</td>
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${record.date}</td>
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${record.time}</td>
                         <td class="px-6 py-4 text-slate-500 font-mono text-xs whitespace-nowrap">${gpsDisplay}</td>
@@ -970,7 +970,7 @@
         function populateLecturerDropdown() {
             const select = document.getElementById('course-lecturer');
             select.innerHTML = '<option value="" disabled selected>Select a Lecturer</option>';
-            lecturers.forEach(l => { select.innerHTML += `<option value="${l.id}">${l.name} (${l.dept})</option>`; });
+            lecturers.forEach(l => { select.innerHTML += `<option value="${l.id}">${toTitleCase(l.name)} (${toTitleCase(l.dept)})</option>`; });
         }
 
         function setupFormHandlers() {
@@ -1020,7 +1020,7 @@
             if(course) {
                 document.getElementById('course-id').value = course.id;
                 document.getElementById('course-code').value = course.code;
-                document.getElementById('course-name').value = course.name;
+                document.getElementById('course-name').value = toTitleCase(course.name);
                 document.getElementById('course-lecturer').value = course.lecturerId;
                 document.getElementById('course-modal-title').innerText = 'Edit Course';
                 openModal('course-modal');
@@ -1038,9 +1038,9 @@
             const lecturer = lecturers.find(l => l.id === id);
             if(lecturer) {
                 document.getElementById('lecturer-id').value = lecturer.id;
-                document.getElementById('lecturer-name').value = lecturer.name;
+                document.getElementById('lecturer-name').value = toTitleCase(lecturer.name);
                 document.getElementById('lecturer-email').value = lecturer.email;
-                document.getElementById('lecturer-dept').value = lecturer.dept;
+                document.getElementById('lecturer-dept').value = lecturer.dept; // Dropdown handles casing via UI selection
                 document.getElementById('lecturer-modal-title').innerText = 'Edit Lecturer';
                 openModal('lecturer-modal');
             }
@@ -1073,7 +1073,7 @@
             const headers = ['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Stream', 'Status', 'Date', 'Time', 'GPS Coordinates'];
             const csvRows = filteredStudents.map(student => [
                 student.studentId, `"${toTitleCase(student.name)}"`, student.level, student.courseCode.toUpperCase(),
-                `"${student.courseName}"`, student.stream || '-', student.status.toUpperCase(), student.date, student.time, `"${student.gps}"`
+                `"${toTitleCase(student.courseName)}"`, student.stream || '-', student.status.toUpperCase(), student.date, student.time, `"${student.gps}"`
             ].join(','));
 
             triggerDownload([headers.join(','), ...csvRows].join('\n'), `attendance_records_${startDate}_to_${endDate}.csv`);
@@ -1094,7 +1094,7 @@
 
             const headers = ['Lecturer Name', 'Course Code', 'Course Name', 'Date', 'Time', 'GPS Coordinates', 'Status'];
             const csvRows = filteredRecords.map(record => [
-                `"${toTitleCase(record.name)}"`, record.courseCode.toUpperCase(), `"${record.courseName}"`,
+                `"${toTitleCase(record.name)}"`, record.courseCode.toUpperCase(), `"${toTitleCase(record.courseName)}"`,
                 record.date, record.time, `"${record.gps}"`, record.status.toUpperCase()
             ].join(','));
 
