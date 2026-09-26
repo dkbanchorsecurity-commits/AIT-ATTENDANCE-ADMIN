@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIT Attendance Admin</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="AIT.png">
+    
+    <!-- PWA Manifest and Theme -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -50,25 +59,15 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Zebra Striping for Tables */
-        .table-zebra tbody tr:nth-child(odd) {
-            background-color: #ffffff;
-        }
-        .table-zebra tbody tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-        .table-zebra tbody tr:hover {
-            background-color: #f1f5f9;
-            transition: background-color 0.2s ease;
-        }
+        .table-zebra tbody tr:nth-child(odd) { background-color: #ffffff; }
+        .table-zebra tbody tr:nth-child(even) { background-color: #f8fafc; }
+        .table-zebra tbody tr:hover { background-color: #f1f5f9; transition: background-color 0.2s ease; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden text-slate-800">
 
-    <!-- Mobile overlay -->
     <div id="mobile-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-20 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar -->
     <aside id="sidebar" class="bg-blue-900 text-white w-64 flex-shrink-0 fixed lg:static inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-30 flex flex-col shadow-xl">
         <div class="p-6 flex items-center justify-between lg:justify-center border-b border-blue-800 flex-shrink-0">
             <h1 class="text-2xl font-bold tracking-wider flex items-center gap-3">
@@ -82,29 +81,30 @@
         
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <a href="#" class="nav-link active flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-blue-800 hover:text-yellow-400 transition-colors bg-blue-800 text-yellow-400 font-medium" data-target="dashboard">
-                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                Dashboard
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
             </a>
             <a href="#" class="nav-link flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-blue-800 hover:text-yellow-400 text-white transition-colors font-medium" data-target="attendance">
-                <i class="fa-solid fa-clipboard-user w-5 text-center"></i>
-                Student Attendance
+                <i class="fa-solid fa-clipboard-user w-5 text-center"></i> Student Attendance
             </a>
             <a href="#" class="nav-link flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-blue-800 hover:text-yellow-400 text-white transition-colors font-medium" data-target="lecturer-attendance">
-                <i class="fa-solid fa-clipboard-check w-5 text-center"></i>
-                Lecturer Attendance
+                <i class="fa-solid fa-clipboard-check w-5 text-center"></i> Lecturer Attendance
             </a>
             <a href="#" class="nav-link flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-blue-800 hover:text-yellow-400 text-white transition-colors font-medium" data-target="courses">
-                <i class="fa-solid fa-book w-5 text-center"></i>
-                Courses
+                <i class="fa-solid fa-book w-5 text-center"></i> Courses
             </a>
             <a href="#" class="nav-link flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-blue-800 hover:text-yellow-400 text-white transition-colors font-medium" data-target="lecturers">
-                <i class="fa-solid fa-chalkboard-user w-5 text-center"></i>
-                Lecturers
+                <i class="fa-solid fa-chalkboard-user w-5 text-center"></i> Lecturers
             </a>
             <a href="#" class="nav-link flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-blue-800 hover:text-yellow-400 text-white transition-colors font-medium" data-target="settings">
-                <i class="fa-solid fa-gear w-5 text-center"></i>
-                Settings
+                <i class="fa-solid fa-gear w-5 text-center"></i> Settings
             </a>
+
+            <!-- PWA Install Button -->
+            <div id="install-container" class="hidden mt-8">
+                <button id="install-button" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> Install App
+                </button>
+            </div>
         </nav>
 
         <div class="p-4 border-t border-blue-800 flex-shrink-0">
@@ -118,10 +118,7 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-        
-        <!-- Mobile Header -->
         <header class="bg-white shadow-sm lg:hidden flex items-center justify-between p-4 z-10 relative border-b border-slate-200 flex-shrink-0">
             <button class="text-slate-600 hover:text-blue-600 focus:outline-none p-2 -ml-2" onclick="toggleSidebar()">
                 <i class="fa-solid fa-bars text-2xl"></i>
@@ -133,9 +130,7 @@
             <div class="w-8"></div>
         </header>
 
-        <!-- Scrollable Content Area -->
         <div class="flex-1 overflow-y-auto p-4 lg:p-8">
-            
             <!-- Dashboard View -->
             <section id="dashboard" class="view-section active space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -149,12 +144,9 @@
                     </div>
                 </div>
 
-                <!-- Metrics Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
                     <div class="bg-blue-900 text-white rounded-2xl p-6 shadow-md flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-blue-800/60 flex items-center justify-center text-blue-100 text-2xl flex-shrink-0">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
+                        <div class="w-14 h-14 rounded-full bg-blue-800/60 flex items-center justify-center text-blue-100 text-2xl flex-shrink-0"><i class="fa-solid fa-users"></i></div>
                         <div>
                             <p class="text-xs sm:text-sm text-blue-200 font-medium uppercase tracking-wider">Total Students</p>
                             <h3 class="text-2xl sm:text-3xl font-bold text-white mt-1" id="stat-students">0</h3>
@@ -162,9 +154,7 @@
                     </div>
                     
                     <div class="bg-purple-600 text-white rounded-2xl p-6 shadow-md flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-purple-500/50 flex items-center justify-center text-purple-100 text-2xl flex-shrink-0">
-                            <i class="fa-solid fa-book-open"></i>
-                        </div>
+                        <div class="w-14 h-14 rounded-full bg-purple-500/50 flex items-center justify-center text-purple-100 text-2xl flex-shrink-0"><i class="fa-solid fa-book-open"></i></div>
                         <div>
                             <p class="text-xs sm:text-sm text-purple-200 font-medium uppercase tracking-wider">Total Courses</p>
                             <h3 class="text-2xl sm:text-3xl font-bold text-white mt-1" id="stat-courses">0</h3>
@@ -172,9 +162,7 @@
                     </div>
 
                     <div class="bg-yellow-600 text-white rounded-2xl p-6 shadow-md flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-yellow-500/50 flex items-center justify-center text-yellow-100 text-2xl flex-shrink-0">
-                            <i class="fa-solid fa-user-tie"></i>
-                        </div>
+                        <div class="w-14 h-14 rounded-full bg-yellow-500/50 flex items-center justify-center text-yellow-100 text-2xl flex-shrink-0"><i class="fa-solid fa-user-tie"></i></div>
                         <div>
                             <p class="text-xs sm:text-sm text-yellow-100 font-medium uppercase tracking-wider">Total Lecturers</p>
                             <h3 class="text-2xl sm:text-3xl font-bold text-white mt-1" id="stat-lecturers">0</h3>
@@ -182,9 +170,7 @@
                     </div>
                     
                     <div class="bg-emerald-600 text-white rounded-2xl p-6 shadow-md flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-emerald-500/50 flex items-center justify-center text-emerald-100 text-2xl flex-shrink-0">
-                            <i class="fa-solid fa-calendar-check"></i>
-                        </div>
+                        <div class="w-14 h-14 rounded-full bg-emerald-500/50 flex items-center justify-center text-emerald-100 text-2xl flex-shrink-0"><i class="fa-solid fa-calendar-check"></i></div>
                         <div>
                             <p class="text-xs sm:text-sm text-emerald-100 font-medium uppercase tracking-wider">Students Present</p>
                             <h3 class="text-2xl sm:text-3xl font-bold text-white mt-1" id="stat-daily-present">0</h3>
@@ -192,9 +178,7 @@
                     </div>
 
                     <div class="bg-teal-600 text-white rounded-2xl p-6 shadow-md flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-teal-500/50 flex items-center justify-center text-teal-100 text-2xl flex-shrink-0">
-                            <i class="fa-solid fa-user-check"></i>
-                        </div>
+                        <div class="w-14 h-14 rounded-full bg-teal-500/50 flex items-center justify-center text-teal-100 text-2xl flex-shrink-0"><i class="fa-solid fa-user-check"></i></div>
                         <div>
                             <p class="text-xs sm:text-sm text-teal-100 font-medium uppercase tracking-wider">Lecturers Present</p>
                             <h3 class="text-2xl sm:text-3xl font-bold text-white mt-1" id="stat-lecturer-daily-present">0</h3>
@@ -202,7 +186,6 @@
                     </div>
                 </div>
 
-                <!-- Chart Section -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 mt-8">
                     <h3 class="text-lg font-semibold text-slate-800 mb-4">Weekly Attendance Trends</h3>
                     <div class="relative h-64 sm:h-72 w-full">
@@ -229,7 +212,6 @@
                             <input type="date" id="attendance-date" class="w-full sm:w-auto px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 shadow-sm cursor-pointer">
                         </div>
                     </div>
-                    
                     <button class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2 text-sm" onclick="downloadAttendanceCSV()">
                         <i class="fa-solid fa-download"></i> Download CSV
                     </button>
@@ -251,8 +233,7 @@
                                     <th class="px-6 py-4 font-semibold text-center">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm" id="attendance-tbody">
-                            </tbody>
+                            <tbody class="divide-y divide-slate-100 text-sm" id="attendance-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -270,7 +251,6 @@
                         <label for="lecturer-attendance-date" class="text-sm font-medium text-slate-700 whitespace-nowrap">Filter by Date:</label>
                         <input type="date" id="lecturer-attendance-date" class="w-full sm:w-auto px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 shadow-sm cursor-pointer">
                     </div>
-                    
                     <button class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2 text-sm" onclick="downloadLecturerAttendanceCSV()">
                         <i class="fa-solid fa-download"></i> Download CSV
                     </button>
@@ -290,8 +270,7 @@
                                     <th class="px-6 py-4 font-semibold text-center">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm" id="lecturer-attendance-tbody">
-                            </tbody>
+                            <tbody class="divide-y divide-slate-100 text-sm" id="lecturer-attendance-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -320,8 +299,7 @@
                                     <th class="px-6 py-4 font-semibold text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm" id="courses-tbody">
-                            </tbody>
+                            <tbody class="divide-y divide-slate-100 text-sm" id="courses-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -350,8 +328,7 @@
                                     <th class="px-6 py-4 font-semibold text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm" id="lecturers-tbody">
-                            </tbody>
+                            <tbody class="divide-y divide-slate-100 text-sm" id="lecturers-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -399,9 +376,7 @@
         <div class="modal-content flex flex-col bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
                 <h3 class="text-lg font-semibold text-slate-800" id="course-modal-title">Add New Course</h3>
-                <button class="text-slate-400 hover:text-slate-600 transition-colors p-1" onclick="closeModal('course-modal')">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <button class="text-slate-400 hover:text-slate-600 transition-colors p-1" onclick="closeModal('course-modal')"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="overflow-y-auto p-6">
                 <form id="course-form" class="space-y-4">
@@ -416,9 +391,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Assign Lecturer</label>
-                        <select id="course-lecturer" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                            <!-- Options populated by JS -->
-                        </select>
+                        <select id="course-lecturer" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></select>
                     </div>
                     <div class="pt-4 flex justify-end gap-3">
                         <button type="button" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors" onclick="closeModal('course-modal')">Cancel</button>
@@ -434,9 +407,7 @@
         <div class="modal-content flex flex-col bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
                 <h3 class="text-lg font-semibold text-slate-800" id="lecturer-modal-title">Add Lecturer</h3>
-                <button class="text-slate-400 hover:text-slate-600 transition-colors p-1" onclick="closeModal('lecturer-modal')">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <button class="text-slate-400 hover:text-slate-600 transition-colors p-1" onclick="closeModal('lecturer-modal')"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="overflow-y-auto p-6">
                 <form id="lecturer-form" class="space-y-4">
@@ -478,7 +449,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -492,7 +462,6 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const db = getFirestore(app);
 
         // --- State Management ---
@@ -513,6 +482,41 @@
         initChart();
         setupFilters();
         setupFormHandlers();
+
+        // --- PWA Installation & Service Worker Logic ---
+        let deferredPrompt;
+        const installContainer = document.getElementById('install-container');
+        const installButton = document.getElementById('install-button');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installContainer.classList.remove('hidden');
+        });
+
+        installButton.addEventListener('click', async () => {
+            installContainer.classList.add('hidden');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installContainer.classList.add('hidden');
+            deferredPrompt = null;
+            console.log('PWA was installed');
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered!'))
+                    .catch(err => console.error('Service Worker registration failed: ', err));
+            });
+        }
 
         // --- Firestore Real-Time Listeners ---
         onSnapshot(collection(db, "lecturers"), (snapshot) => {
@@ -538,7 +542,6 @@
             updateDashboardStats();
         });
 
-
         // --- Navigation Logic ---
         function setupNavigation() {
             const navLinks = document.querySelectorAll('.nav-link');
@@ -555,7 +558,6 @@
                 const targetId = e.state && e.state.view 
                     ? e.state.view 
                     : (window.location.hash.replace('#', '') || 'dashboard');
-                
                 navigateTo(targetId, false);
             });
         }
@@ -655,6 +657,7 @@
             
             updateDailyPresentCount(dateStr);
             updateLecturerDailyPresentCount(dateStr);
+            updateChartDynamically(dateStr);
         }
 
         function updateDailyPresentCount(dateStr) {
@@ -680,25 +683,26 @@
             
             const data = {
                 labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-                datasets: [{
-                    label: 'Overall Attendance %',
-                    data: [85, 88, 82, 90, 86],
-                    borderColor: '#3b82f6', 
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
+                datasets: [
+                    { label: 'Present', data: [0, 0, 0, 0, 0], backgroundColor: '#10b981', borderRadius: 4 },
+                    { label: 'Late', data: [0, 0, 0, 0, 0], backgroundColor: '#f59e0b', borderRadius: 4 },
+                    { label: 'Absent', data: [0, 0, 0, 0, 0], backgroundColor: '#ef4444', borderRadius: 4 }
+                ]
             };
 
             const config = {
-                type: 'line',
+                type: 'bar',
                 data: data,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: false, min: 60, max: 100 } }
+                    plugins: { 
+                        legend: { display: true, position: 'bottom', labels: { usePointStyle: true, padding: 20 } } 
+                    },
+                    scales: { 
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true } 
+                    }
                 }
             };
 
@@ -706,6 +710,45 @@
                 attendanceChartInstance.destroy();
             }
             attendanceChartInstance = new Chart(ctx, config);
+        }
+
+        function updateChartDynamically(selectedDateStr) {
+            if (!attendanceChartInstance || !selectedDateStr) return;
+
+            const dates = [];
+            const labels = [];
+            const [year, month, day] = selectedDateStr.split('-').map(Number);
+            
+            for (let i = 4; i >= 0; i--) {
+                const d = new Date(year, month - 1, day - i);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                
+                dates.push(`${yyyy}-${mm}-${dd}`);
+                labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+            }
+
+            const presentCounts = [];
+            const lateCounts = [];
+            const absentCounts = [];
+
+            dates.forEach(dateStr => {
+                const dayRecords = students.filter(s => s.date === dateStr);
+                const present = dayRecords.filter(s => s.status === 'present').length;
+                const late = dayRecords.filter(s => s.status === 'late').length;
+                const absent = dayRecords.filter(s => s.status === 'absent').length;
+                
+                presentCounts.push(present);
+                lateCounts.push(late);
+                absentCounts.push(absent);
+            });
+
+            attendanceChartInstance.data.labels = labels;
+            attendanceChartInstance.data.datasets[0].data = presentCounts;
+            attendanceChartInstance.data.datasets[1].data = lateCounts;
+            attendanceChartInstance.data.datasets[2].data = absentCounts;
+            attendanceChartInstance.update();
         }
 
         // --- Rendering Logic ---
@@ -728,12 +771,8 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 border-b border-slate-100 text-right whitespace-nowrap">
-                        <button class="text-blue-600 hover:text-blue-800 mr-4 transition-colors p-2" onclick="editCourse('${course.id}')">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button class="text-red-500 hover:text-red-700 transition-colors p-2" onclick="deleteCourse('${course.id}')">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <button class="text-blue-600 hover:text-blue-800 mr-4 transition-colors p-2" onclick="editCourse('${course.id}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="text-red-500 hover:text-red-700 transition-colors p-2" onclick="deleteCourse('${course.id}')"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -757,12 +796,8 @@
                     <td class="px-6 py-4 border-b border-slate-100 text-slate-600 whitespace-nowrap">${lecturer.dept}</td>
                     <td class="px-6 py-4 border-b border-slate-100 text-slate-600 whitespace-nowrap">${lecturer.email}</td>
                     <td class="px-6 py-4 border-b border-slate-100 text-right whitespace-nowrap">
-                        <button class="text-blue-600 hover:text-blue-800 mr-4 transition-colors p-2" onclick="editLecturer('${lecturer.id}')">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button class="text-red-500 hover:text-red-700 transition-colors p-2" onclick="deleteLecturer('${lecturer.id}')">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <button class="text-blue-600 hover:text-blue-800 mr-4 transition-colors p-2" onclick="editLecturer('${lecturer.id}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="text-red-500 hover:text-red-700 transition-colors p-2" onclick="deleteLecturer('${lecturer.id}')"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -779,34 +814,26 @@
             
             let filteredStudents = students;
             
-            if (dateFilter) {
-                filteredStudents = filteredStudents.filter(student => student.date === dateFilter);
-            }
-
-            if (searchFilter) {
-                filteredStudents = filteredStudents.filter(student => student.courseCode.toUpperCase().includes(searchFilter));
-            }
+            if (dateFilter) filteredStudents = filteredStudents.filter(student => student.date === dateFilter);
+            if (searchFilter) filteredStudents = filteredStudents.filter(student => student.courseCode.toUpperCase().includes(searchFilter));
             
             if (filteredStudents.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="9" class="px-6 py-8 text-center text-slate-500 bg-white">
-                    <i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i>
-                    No attendance records found for the selected criteria.
+                    <i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No attendance records found for the selected criteria.
                 </td></tr>`;
             } else {
                 filteredStudents.forEach(student => {
-                    const isPresent = student.status === 'present';
-                    const statusBadge = isPresent 
-                        ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Present
-                           </span>`
-                        : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Absent
-                           </span>`;
+                    let statusBadge = '';
+                    if (student.status === 'present') {
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Present</span>`;
+                    } else if (student.status === 'late') {
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Late</span>`;
+                    } else {
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Absent</span>`;
+                    }
 
                     const gpsDisplay = student.gps && student.gps !== '-' 
-                        ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(student.gps)}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline transition-colors inline-flex items-center gap-1">
-                                <i class="fa-solid fa-map-location-dot"></i> ${student.gps}
-                           </a>`
+                        ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(student.gps)}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline transition-colors inline-flex items-center gap-1"><i class="fa-solid fa-map-location-dot"></i> ${student.gps}</a>`
                         : student.gps;
 
                     const tr = document.createElement('tr');
@@ -819,9 +846,7 @@
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${student.date}</td>
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${student.time}</td>
                         <td class="px-6 py-4 text-slate-500 font-mono text-xs whitespace-nowrap">${gpsDisplay}</td>
-                        <td class="px-6 py-4 text-center whitespace-nowrap">
-                            ${statusBadge}
-                        </td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">${statusBadge}</td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -834,31 +859,25 @@
             tbody.innerHTML = '';
             
             let filteredRecords = lecturerAttendanceRecords;
-            
-            if (dateFilter) {
-                filteredRecords = filteredRecords.filter(record => record.date === dateFilter);
-            }
+            if (dateFilter) filteredRecords = filteredRecords.filter(record => record.date === dateFilter);
             
             if (filteredRecords.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500 bg-white">
-                    <i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i>
-                    No lecturer attendance records found for the selected date.
+                    <i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No lecturer attendance records found for the selected date.
                 </td></tr>`;
             } else {
                 filteredRecords.forEach(record => {
-                    const isPresent = record.status === 'present';
-                    const statusBadge = isPresent 
-                        ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Present
-                           </span>`
-                        : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Absent
-                           </span>`;
+                    let statusBadge = '';
+                    if (record.status === 'present') {
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Present</span>`;
+                    } else if (record.status === 'late') {
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Late</span>`;
+                    } else {
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Absent</span>`;
+                    }
 
                     const gpsDisplay = record.gps && record.gps !== '-' 
-                        ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(record.gps)}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline transition-colors inline-flex items-center gap-1">
-                                <i class="fa-solid fa-map-location-dot"></i> ${record.gps}
-                           </a>`
+                        ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(record.gps)}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline transition-colors inline-flex items-center gap-1"><i class="fa-solid fa-map-location-dot"></i> ${record.gps}</a>`
                         : record.gps;
 
                     const tr = document.createElement('tr');
@@ -874,9 +893,7 @@
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${record.date}</td>
                         <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${record.time}</td>
                         <td class="px-6 py-4 text-slate-500 font-mono text-xs whitespace-nowrap">${gpsDisplay}</td>
-                        <td class="px-6 py-4 text-center whitespace-nowrap">
-                            ${statusBadge}
-                        </td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">${statusBadge}</td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -887,18 +904,13 @@
         function populateLecturerDropdown() {
             const select = document.getElementById('course-lecturer');
             select.innerHTML = '<option value="" disabled selected>Select a Lecturer</option>';
-            lecturers.forEach(l => {
-                select.innerHTML += `<option value="${l.id}">${l.name} (${l.dept})</option>`;
-            });
+            lecturers.forEach(l => { select.innerHTML += `<option value="${l.id}">${l.name} (${l.dept})</option>`; });
         }
 
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
-            
             if(modalId === 'course-modal') {
                 document.getElementById('course-form').reset();
                 document.getElementById('course-id').value = '';
@@ -919,11 +931,7 @@
                 const name = document.getElementById('course-name').value;
                 const lecturerId = document.getElementById('course-lecturer').value;
 
-                if(!lecturerId) {
-                    showMessage("Please assign a lecturer.");
-                    return;
-                }
-
+                if(!lecturerId) return showMessage("Please assign a lecturer.", "error");
                 try {
                     if (id) {
                         await updateDoc(doc(db, "courses", id), { code, name, lecturerId });
@@ -933,9 +941,7 @@
                         showMessage("Course added successfully.");
                     }
                     closeModal('course-modal');
-                } catch (error) {
-                    showMessage("Error saving course: " + error.message);
-                }
+                } catch (error) { showMessage("Error saving course: " + error.message, "error"); }
             });
 
             document.getElementById('lecturer-form').addEventListener('submit', async function(e) {
@@ -954,9 +960,7 @@
                         showMessage("Lecturer added successfully.");
                     }
                     closeModal('lecturer-modal');
-                } catch (error) {
-                    showMessage("Error saving lecturer: " + error.message);
-                }
+                } catch (error) { showMessage("Error saving lecturer: " + error.message, "error"); }
             });
         }
 
@@ -977,9 +981,7 @@
             try {
                 await deleteDoc(doc(db, "courses", id));
                 showMessage("Course deleted.");
-            } catch (error) {
-                showMessage("Error deleting course: " + error.message);
-            }
+            } catch (error) { showMessage("Error deleting course: " + error.message, "error"); }
         }
 
         async function editLecturer(id) {
@@ -995,155 +997,80 @@
         }
 
         async function deleteLecturer(id) {
-            const hasCourses = courses.some(c => c.lecturerId === id);
-            if(hasCourses) {
-                showMessage("Cannot delete: Lecturer is assigned to active courses.");
-                return;
-            }
-            
+            if(courses.some(c => c.lecturerId === id)) return showMessage("Cannot delete: Lecturer is assigned to active courses.", "error");
             try {
                 await deleteDoc(doc(db, "lecturers", id));
                 showMessage("Lecturer deleted.");
-            } catch (error) {
-                showMessage("Error deleting lecturer: " + error.message);
-            }
+            } catch (error) { showMessage("Error deleting lecturer: " + error.message, "error"); }
         }
 
         // --- Export Functions ---
         function downloadAttendanceCSV() {
             const dateFilter = document.getElementById('attendance-date') ? document.getElementById('attendance-date').value : '';
             const searchFilter = document.getElementById('attendance-search') ? document.getElementById('attendance-search').value.toUpperCase().trim() : '';
-            
-            if (!dateFilter) {
-                showMessage("Please select a date to download records.", "error");
-                return;
-            }
+            if (!dateFilter) return showMessage("Please select a date to download records.", "error");
 
             let filteredStudents = students.filter(student => student.date === dateFilter);
-            
-            if (searchFilter) {
-                filteredStudents = filteredStudents.filter(student => student.courseCode.toUpperCase().includes(searchFilter));
-            }
+            if (searchFilter) filteredStudents = filteredStudents.filter(student => student.courseCode.toUpperCase().includes(searchFilter));
+            if (filteredStudents.length === 0) return showMessage("No records to download for the selected date.");
 
-            if (filteredStudents.length === 0) {
-                showMessage("No records to download for the selected date.");
-                return;
-            }
+            const headers = ['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Status', 'Date', 'Time', 'GPS Coordinates'];
+            const csvRows = filteredStudents.map(student => [
+                student.studentId, `"${student.name}"`, student.level, student.courseCode.toUpperCase(),
+                `"${student.courseName}"`, student.status.toUpperCase(), student.date, student.time, `"${student.gps}"`
+            ].join(','));
 
-            const headers = [
-                'Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 
-                'Status', 'Date', 'Time', 'GPS Coordinates'
-            ];
-
-            const csvRows = filteredStudents.map(student => {
-                return [
-                    student.studentId,
-                    `"${student.name}"`, 
-                    student.level,
-                    student.courseCode.toUpperCase(),
-                    `"${student.courseName}"`,
-                    student.status.toUpperCase(),
-                    student.date,
-                    student.time,
-                    `"${student.gps}"`
-                ].join(',');
-            });
-
-            const csvContent = [headers.join(','), ...csvRows].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `attendance_records_${dateFilter}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showMessage("Download started.");
+            triggerDownload([headers.join(','), ...csvRows].join('\n'), `attendance_records_${dateFilter}.csv`);
         }
 
         function downloadLecturerAttendanceCSV() {
             const dateFilter = document.getElementById('lecturer-attendance-date') ? document.getElementById('lecturer-attendance-date').value : '';
-            
-            if (!dateFilter) {
-                showMessage("Please select a date to download records.", "error");
-                return;
-            }
+            if (!dateFilter) return showMessage("Please select a date to download records.", "error");
 
             let filteredRecords = lecturerAttendanceRecords.filter(record => record.date === dateFilter);
-
-            if (filteredRecords.length === 0) {
-                showMessage("No lecturer records to download for the selected date.");
-                return;
-            }
+            if (filteredRecords.length === 0) return showMessage("No lecturer records to download for the selected date.");
 
             const headers = ['Lecturer Name', 'Course Code', 'Course Name', 'Date', 'Time', 'GPS Coordinates', 'Status'];
+            const csvRows = filteredRecords.map(record => [
+                `"${record.name}"`, record.courseCode.toUpperCase(), `"${record.courseName}"`,
+                record.date, record.time, `"${record.gps}"`, record.status.toUpperCase()
+            ].join(','));
 
-            const csvRows = filteredRecords.map(record => {
-                return [
-                    `"${record.name}"`,
-                    record.courseCode.toUpperCase(),
-                    `"${record.courseName}"`,
-                    record.date,
-                    record.time,
-                    `"${record.gps}"`,
-                    record.status.toUpperCase()
-                ].join(',');
-            });
+            triggerDownload([headers.join(','), ...csvRows].join('\n'), `lecturer_attendance_${dateFilter}.csv`);
+        }
 
-            const csvContent = [headers.join(','), ...csvRows].join('\n');
+        function triggerDownload(csvContent, filename) {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `lecturer_attendance_${dateFilter}.csv`);
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
             link.style.visibility = 'hidden';
-            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
             showMessage("Download started.");
         }
 
         function showMessage(msg, type = "success") {
             const box = document.getElementById('message-box');
-            const text = document.getElementById('message-text');
             const icon = box.querySelector('i');
-            
-            text.innerText = msg;
+            document.getElementById('message-text').innerText = msg;
             
             if (type === "error") {
                 icon.className = "fa-solid fa-circle-exclamation text-red-400 flex-shrink-0";
-                box.classList.remove('bg-slate-800');
-                box.classList.add('bg-red-900');
+                box.classList.replace('bg-slate-800', 'bg-red-900');
             } else {
                 icon.className = "fa-solid fa-circle-check text-green-400 flex-shrink-0";
-                box.classList.remove('bg-red-900');
-                box.classList.add('bg-slate-800');
+                box.classList.replace('bg-red-900', 'bg-slate-800');
             }
 
             box.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => {
-                box.classList.add('translate-y-24', 'opacity-0');
-            }, 3000);
+            setTimeout(() => box.classList.add('translate-y-24', 'opacity-0'), 3000);
         }
 
-        // --- Expose functions to global scope for HTML onclick attributes ---
-        window.toggleSidebar = toggleSidebar;
-        window.openModal = openModal;
-        window.closeModal = closeModal;
-        window.editCourse = editCourse;
-        window.deleteCourse = deleteCourse;
-        window.editLecturer = editLecturer;
-        window.deleteLecturer = deleteLecturer;
-        window.downloadAttendanceCSV = downloadAttendanceCSV;
-        window.downloadLecturerAttendanceCSV = downloadLecturerAttendanceCSV;
-        window.showMessage = showMessage;
+        window.toggleSidebar = toggleSidebar; window.openModal = openModal; window.closeModal = closeModal;
+        window.editCourse = editCourse; window.deleteCourse = deleteCourse; window.editLecturer = editLecturer; window.deleteLecturer = deleteLecturer;
+        window.downloadAttendanceCSV = downloadAttendanceCSV; window.downloadLecturerAttendanceCSV = downloadLecturerAttendanceCSV; window.showMessage = showMessage;
     </script>
 </body>
 </html>
