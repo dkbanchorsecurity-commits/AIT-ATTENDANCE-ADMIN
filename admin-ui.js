@@ -1,4 +1,4 @@
-// Sidebar Toggle
+// --- Sidebar Toggle ---
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('mobile-overlay');
@@ -12,7 +12,7 @@ function toggleSidebar() {
     }
 }
 
-// Modal Management
+// --- Modal Management ---
 function openModal(modalId) { 
     document.getElementById(modalId).classList.add('active'); 
 }
@@ -31,7 +31,7 @@ function closeModal(modalId) {
     }
 }
 
-// Toast Notifications
+// --- Toast Notifications ---
 function showMessage(msg, type = "success") {
     const box = document.getElementById('message-box');
     const icon = box.querySelector('i');
@@ -49,7 +49,7 @@ function showMessage(msg, type = "success") {
     setTimeout(() => box.classList.add('translate-y-24', 'opacity-0'), 3000);
 }
 
-// Formatting Helpers
+// --- Formatting Helpers ---
 function toTitleCase(str) {
     if (!str) return '';
     return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -66,3 +66,53 @@ function getGpsLink(gps) {
     if (!gps || gps === '-') return '-';
     return `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gps)}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline transition-colors inline-flex items-center gap-1"><i class="fa-solid fa-map-location-dot"></i> ${gps}</a>`;
 }
+
+// --- Theme & Dark Mode Logic ---
+function initTheme() {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        updateThemeToggleUI(true);
+    } else {
+        document.documentElement.classList.remove('dark');
+        updateThemeToggleUI(false);
+    }
+}
+
+function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.theme = isDark ? 'dark' : 'light';
+    updateThemeToggleUI(isDark);
+    
+    // Dynamically update Chart.js labels if the chart exists
+    const chart = typeof window.getChartInstance === 'function' ? window.getChartInstance() : null;
+    if (chart) {
+        chart.options.scales.x.ticks.color = isDark ? '#cbd5e1' : '#64748b';
+        chart.options.scales.y.ticks.color = isDark ? '#cbd5e1' : '#64748b';
+        chart.options.plugins.legend.labels.color = isDark ? '#f8fafc' : '#475569';
+        chart.update();
+    }
+}
+
+function updateThemeToggleUI(isDark) {
+    const btn = document.getElementById('theme-toggle-btn');
+    const knob = document.getElementById('theme-toggle-knob');
+    if (btn && knob) {
+        if (isDark) {
+            btn.classList.replace('bg-slate-300', 'bg-blue-600');
+            knob.classList.replace('translate-x-1', 'translate-x-6');
+        } else {
+            btn.classList.replace('bg-blue-600', 'bg-slate-300');
+            knob.classList.replace('translate-x-6', 'translate-x-1');
+        }
+    }
+}
+
+// Run immediately to prevent a white-flash on load
+initTheme();
+
+// Expose standard functions for HTML attributes
+window.toggleSidebar = toggleSidebar;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.showMessage = showMessage;
+window.toggleTheme = toggleTheme;

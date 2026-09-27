@@ -20,7 +20,10 @@ let students = [];
 let lecturerAttendanceRecords = [];
 let attendanceChartInstance = null;
 
-// Initialize App
+// Expose Chart Instance for Dark Mode Toggle
+window.getChartInstance = () => attendanceChartInstance;
+
+// --- Initialize App ---
 const hash = window.location.hash.replace('#', '');
 const initialView = document.getElementById(hash) ? hash : 'dashboard';
 
@@ -121,7 +124,7 @@ function navigateTo(targetId, updateHistory = true) {
     });
 
     if(window.innerWidth < 1024 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
-        toggleSidebar(); 
+        window.toggleSidebar(); 
     }
 }
 
@@ -188,6 +191,12 @@ function updateDashboardStats() {
 
 function initChart() {
     const ctx = document.getElementById('attendanceChart').getContext('2d');
+    
+    // Check if dark mode is active for initial chart colors
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#cbd5e1' : '#64748b';
+    const legendColor = isDark ? '#f8fafc' : '#475569';
+
     attendanceChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -198,7 +207,17 @@ function initChart() {
                 { label: 'Absent', data: [], backgroundColor: '#ef4444', borderRadius: 4 }
             ]
         },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: legendColor } }
+            },
+            scales: { 
+                x: { stacked: true, ticks: { color: textColor } }, 
+                y: { stacked: true, beginAtZero: true, ticks: { color: textColor } } 
+            } 
+        }
     });
 }
 
@@ -234,10 +253,10 @@ function renderCourses() {
     tbody.innerHTML = '';
     courses.forEach(c => {
         const l = lecturers.find(x => x.id === c.lecturerId);
-        const lName = l ? toTitleCase(l.name) : '<span class="text-red-500">Unassigned</span>';
+        const lName = l ? window.toTitleCase(l.name) : '<span class="text-red-500">Unassigned</span>';
         tbody.insertAdjacentHTML('beforeend', `<tr>
             <td class="px-6 py-4 font-medium">${c.code.toUpperCase()}</td>
-            <td class="px-6 py-4">${toTitleCase(c.name)}</td>
+            <td class="px-6 py-4">${window.toTitleCase(c.name)}</td>
             <td class="px-6 py-4"><i class="fa-solid fa-user text-slate-400 text-xs mr-2"></i>${lName}</td>
             <td class="px-6 py-4 text-right">
                 <button class="text-blue-600 hover:text-blue-800 mr-4" onclick="editCourse('${c.id}')"><i class="fa-solid fa-pen"></i></button>
@@ -253,10 +272,10 @@ function renderLecturers() {
     lecturers.forEach(l => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
             <td class="px-6 py-4 flex items-center gap-3">
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(toTitleCase(l.name))}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full">
-                <span class="font-medium">${toTitleCase(l.name)}</span>
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(window.toTitleCase(l.name))}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full">
+                <span class="font-medium">${window.toTitleCase(l.name)}</span>
             </td>
-            <td class="px-6 py-4">${toTitleCase(l.dept)}</td>
+            <td class="px-6 py-4">${window.toTitleCase(l.dept)}</td>
             <td class="px-6 py-4">${l.email}</td>
             <td class="px-6 py-4 text-right">
                 <button class="text-blue-600 hover:text-blue-800 mr-4" onclick="editLecturer('${l.id}')"><i class="fa-solid fa-pen"></i></button>
@@ -280,15 +299,15 @@ function renderAttendance() {
     filtered.forEach(s => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
             <td class="px-6 py-4 font-medium">${s.studentId}</td>
-            <td class="px-6 py-4">${toTitleCase(s.name)}</td>
+            <td class="px-6 py-4">${window.toTitleCase(s.name)}</td>
             <td class="px-6 py-4">${s.level}</td>
             <td class="px-6 py-4 font-medium">${s.courseCode.toUpperCase()}</td>
-            <td class="px-6 py-4">${toTitleCase(s.courseName)}</td>
+            <td class="px-6 py-4">${window.toTitleCase(s.courseName)}</td>
             <td class="px-6 py-4 font-medium">${s.stream || '-'}</td>
             <td class="px-6 py-4">${s.date}</td>
             <td class="px-6 py-4">${s.time}</td>
-            <td class="px-6 py-4 font-mono text-xs">${getGpsLink(s.gps)}</td>
-            <td class="px-6 py-4 text-center">${getStatusBadge(s.status)}</td>
+            <td class="px-6 py-4 font-mono text-xs">${window.getGpsLink(s.gps)}</td>
+            <td class="px-6 py-4 text-center">${window.getStatusBadge(s.status)}</td>
         </tr>`);
     });
 }
@@ -306,15 +325,15 @@ function renderLecturerAttendance() {
     filtered.forEach(r => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
             <td class="px-6 py-4 flex items-center gap-3">
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(toTitleCase(r.name))}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full">
-                <span class="font-medium">${toTitleCase(r.name)}</span>
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(window.toTitleCase(r.name))}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full">
+                <span class="font-medium">${window.toTitleCase(r.name)}</span>
             </td>
             <td class="px-6 py-4 font-medium">${r.courseCode.toUpperCase()}</td>
-            <td class="px-6 py-4">${toTitleCase(r.courseName)}</td>
+            <td class="px-6 py-4">${window.toTitleCase(r.courseName)}</td>
             <td class="px-6 py-4">${r.date}</td>
             <td class="px-6 py-4">${r.time}</td>
-            <td class="px-6 py-4 font-mono text-xs">${getGpsLink(r.gps)}</td>
-            <td class="px-6 py-4 text-center">${getStatusBadge(r.status)}</td>
+            <td class="px-6 py-4 font-mono text-xs">${window.getGpsLink(r.gps)}</td>
+            <td class="px-6 py-4 text-center">${window.getStatusBadge(r.status)}</td>
         </tr>`);
     });
 }
@@ -323,7 +342,7 @@ function renderLecturerAttendance() {
 function populateLecturerDropdown() {
     const sel = document.getElementById('course-lecturer');
     sel.innerHTML = '<option value="" disabled selected>Select a Lecturer</option>';
-    lecturers.forEach(l => sel.innerHTML += `<option value="${l.id}">${toTitleCase(l.name)} (${toTitleCase(l.dept)})</option>`);
+    lecturers.forEach(l => sel.innerHTML += `<option value="${l.id}">${window.toTitleCase(l.name)} (${window.toTitleCase(l.dept)})</option>`);
 }
 
 function setupFormHandlers() {
@@ -334,13 +353,13 @@ function setupFormHandlers() {
         const name = document.getElementById('course-name').value;
         const lecturerId = document.getElementById('course-lecturer').value;
 
-        if(!lecturerId) return showMessage("Please assign a lecturer.", "error");
+        if(!lecturerId) return window.showMessage("Please assign a lecturer.", "error");
         try {
             id ? await updateDoc(doc(db, "courses", id), { code, name, lecturerId }) 
                : await addDoc(collection(db, "courses"), { code, name, lecturerId });
-            showMessage(id ? "Course updated." : "Course added.");
-            closeModal('course-modal');
-        } catch (e) { showMessage("Error: " + e.message, "error"); }
+            window.showMessage(id ? "Course updated." : "Course added.");
+            window.closeModal('course-modal');
+        } catch (e) { window.showMessage("Error: " + e.message, "error"); }
     });
 
     document.getElementById('lecturer-form').addEventListener('submit', async (e) => {
@@ -355,9 +374,9 @@ function setupFormHandlers() {
         try {
             id ? await updateDoc(doc(db, "lecturers", id), data) 
                : await addDoc(collection(db, "lecturers"), data);
-            showMessage(id ? "Lecturer updated." : "Lecturer added.");
-            closeModal('lecturer-modal');
-        } catch (e) { showMessage("Error: " + e.message, "error"); }
+            window.showMessage(id ? "Lecturer updated." : "Lecturer added.");
+            window.closeModal('lecturer-modal');
+        } catch (e) { window.showMessage("Error: " + e.message, "error"); }
     });
 }
 
@@ -366,45 +385,45 @@ window.editCourse = (id) => {
     if(c) {
         document.getElementById('course-id').value = c.id;
         document.getElementById('course-code').value = c.code;
-        document.getElementById('course-name').value = toTitleCase(c.name);
+        document.getElementById('course-name').value = window.toTitleCase(c.name);
         document.getElementById('course-lecturer').value = c.lecturerId;
         document.getElementById('course-modal-title').innerText = 'Edit Course';
-        openModal('course-modal');
+        window.openModal('course-modal');
     }
 };
 
 window.deleteCourse = async (id) => {
-    try { await deleteDoc(doc(db, "courses", id)); showMessage("Course deleted."); } 
-    catch (e) { showMessage("Error: " + e.message, "error"); }
+    try { await deleteDoc(doc(db, "courses", id)); window.showMessage("Course deleted."); } 
+    catch (e) { window.showMessage("Error: " + e.message, "error"); }
 };
 
 window.editLecturer = (id) => {
     const l = lecturers.find(x => x.id === id);
     if(l) {
         document.getElementById('lecturer-id').value = l.id;
-        document.getElementById('lecturer-name').value = toTitleCase(l.name);
+        document.getElementById('lecturer-name').value = window.toTitleCase(l.name);
         document.getElementById('lecturer-email').value = l.email;
         document.getElementById('lecturer-dept').value = l.dept;
         document.getElementById('lecturer-modal-title').innerText = 'Edit Lecturer';
-        openModal('lecturer-modal');
+        window.openModal('lecturer-modal');
     }
 };
 
 window.deleteLecturer = async (id) => {
-    if(courses.some(c => c.lecturerId === id)) return showMessage("Cannot delete: Assigned to active courses.", "error");
-    try { await deleteDoc(doc(db, "lecturers", id)); showMessage("Lecturer deleted."); } 
-    catch (e) { showMessage("Error: " + e.message, "error"); }
+    if(courses.some(c => c.lecturerId === id)) return window.showMessage("Cannot delete: Assigned to active courses.", "error");
+    try { await deleteDoc(doc(db, "lecturers", id)); window.showMessage("Lecturer deleted."); } 
+    catch (e) { window.showMessage("Error: " + e.message, "error"); }
 };
 
 // --- CSV Exports ---
 window.downloadAttendanceCSV = () => {
     const filtered = getFilteredStudents();
-    if (filtered.length === 0) return showMessage("No records to download.");
+    if (filtered.length === 0) return window.showMessage("No records to download.");
 
     const headers = ['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Stream', 'Status', 'Date', 'Time', 'GPS Coordinates'];
     const rows = filtered.map(s => [
-        s.studentId, `"${toTitleCase(s.name)}"`, s.level, s.courseCode.toUpperCase(),
-        `"${toTitleCase(s.courseName)}"`, s.stream || '-', s.status.toUpperCase(), s.date, s.time, `"${s.gps}"`
+        s.studentId, `"${window.toTitleCase(s.name)}"`, s.level, s.courseCode.toUpperCase(),
+        `"${window.toTitleCase(s.courseName)}"`, s.stream || '-', s.status.toUpperCase(), s.date, s.time, `"${s.gps}"`
     ].join(','));
 
     triggerDownload([headers.join(','), ...rows].join('\n'), `student_attendance.csv`);
@@ -412,11 +431,11 @@ window.downloadAttendanceCSV = () => {
 
 window.downloadLecturerAttendanceCSV = () => {
     const filtered = getFilteredLecturerRecords();
-    if (filtered.length === 0) return showMessage("No records to download.");
+    if (filtered.length === 0) return window.showMessage("No records to download.");
 
     const headers = ['Lecturer Name', 'Course Code', 'Course Name', 'Date', 'Time', 'GPS Coordinates', 'Status'];
     const rows = filtered.map(r => [
-        `"${toTitleCase(r.name)}"`, r.courseCode.toUpperCase(), `"${toTitleCase(r.courseName)}"`,
+        `"${window.toTitleCase(r.name)}"`, r.courseCode.toUpperCase(), `"${window.toTitleCase(r.courseName)}"`,
         r.date, r.time, `"${r.gps}"`, r.status.toUpperCase()
     ].join(','));
 
@@ -431,5 +450,5 @@ function triggerDownload(csvContent, filename) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showMessage("Download started.");
+    window.showMessage("Download started.");
 }

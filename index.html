@@ -287,6 +287,22 @@
 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+                        
+                        <!-- Appearance Section -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2 mb-4">Appearance</h3>
+                            <div class="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div>
+                                    <p class="font-medium text-slate-800">Dark Mode</p>
+                                    <p class="text-sm text-slate-500">Toggle dark theme for the dashboard interface.</p>
+                                </div>
+                                <button id="theme-toggle-btn" onclick="toggleTheme()" class="relative inline-flex h-7 w-12 items-center rounded-full bg-slate-300 transition-colors focus:outline-none shadow-inner">
+                                    <span id="theme-toggle-knob" class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-1"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Profile Section -->
                         <div>
                             <h3 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2 mb-4">Institution Profile</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -313,7 +329,7 @@
         </div>
     </main>
 
-    <!-- Modals -->
+    <!-- Modals (Course & Lecturer) -->
     <div id="course-modal" class="modal-overlay fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="modal-content flex flex-col bg-white rounded-2xl shadow-xl w-full max-w-md">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -372,10 +388,9 @@
         </div>
     </div>
 
-    <!-- External UI Script -->
+    <!-- External Scripts -->
     <script src="admin-ui.js"></script>
-    
-    <!-- External App & Firebase Module -->
     <script type="module" src="admin-app.js"></script>
+
 </body>
 </html>
