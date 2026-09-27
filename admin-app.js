@@ -14,16 +14,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let lecturers = [];
-let courses = [];
-let students = [];
-let lecturerAttendanceRecords = [];
-let attendanceChartInstance = null;
-
-// Expose Chart Instance for Dark Mode Toggle
+let lecturers = [], courses = [], students = [], lecturerAttendanceRecords = [], attendanceChartInstance = null;
 window.getChartInstance = () => attendanceChartInstance;
 
-// --- Initialize App ---
 const hash = window.location.hash.replace('#', '');
 const initialView = document.getElementById(hash) ? hash : 'dashboard';
 
@@ -36,7 +29,6 @@ setupFilters();
 setupFormHandlers();
 initPWA();
 
-// --- PWA Logic ---
 function initPWA() {
     let deferredPrompt;
     const installButtons = document.querySelectorAll('.pwa-install-btn');
@@ -57,13 +49,31 @@ function initPWA() {
         });
     });
 
-    window.addEventListener('appinstalled', () => {
-        installButtons.forEach(btn => btn.classList.add('hidden'));
-        deferredPrompt = null;
-    });
+    window.addEventListener('appinstalled', () => installButtons.forEach(btn => btn.classList.add('hidden')));
 
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+        let isRefreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!isRefreshing) { isRefreshing = true; window.location.reload(); }
+        });
+
+        window.addEventListener('load', async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('./sw.js');
+                registration.update();
+                document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') registration.update(); });
+                setInterval(() => registration.update(), 30 * 60 * 1000);
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    if (!newWorker) return;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    });
+                });
+            } catch (err) { console.error('SW error:', err); }
+        });
     }
 }
 
@@ -73,18 +83,15 @@ onSnapshot(collection(db, "lecturers"), (snapshot) => {
     renderLecturers();
     populateLecturerDropdown();
 });
-
 onSnapshot(collection(db, "courses"), (snapshot) => {
     courses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderCourses();
 });
-
 onSnapshot(collection(db, "student_attendance"), (snapshot) => {
     students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderAttendance();
     updateDashboardStats();
 });
-
 onSnapshot(collection(db, "lecturer_attendance"), (snapshot) => {
     lecturerAttendanceRecords = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderLecturerAttendance();
@@ -99,7 +106,6 @@ function setupNavigation() {
             navigateTo(link.getAttribute('data-target'), true);
         });
     });
-
     window.addEventListener('popstate', (e) => {
         const targetId = e.state && e.state.view ? e.state.view : (window.location.hash.replace('#', '') || 'dashboard');
         navigateTo(targetId, false);
@@ -109,7 +115,6 @@ function setupNavigation() {
 function navigateTo(targetId, updateHistory = true) {
     const targetView = document.getElementById(targetId);
     if (!targetView) return;
-
     if (updateHistory) history.pushState({ view: targetId }, '', '#' + targetId);
 
     document.querySelectorAll('.nav-link').forEach(l => {
@@ -131,7 +136,6 @@ function navigateTo(targetId, updateHistory = true) {
 // --- Filters & Queries ---
 function setupFilters() {
     const today = new Date().toISOString().split('T')[0];
-
     ['attendance-start-date', 'attendance-end-date', 'lecturer-start-date', 'lecturer-end-date', 'dashboard-master-date'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = today;
@@ -140,7 +144,6 @@ function setupFilters() {
     document.getElementById('attendance-start-date')?.addEventListener('change', renderAttendance);
     document.getElementById('attendance-end-date')?.addEventListener('change', renderAttendance);
     document.getElementById('attendance-search')?.addEventListener('input', renderAttendance);
-    
     document.getElementById('lecturer-start-date')?.addEventListener('change', renderLecturerAttendance);
     document.getElementById('lecturer-end-date')?.addEventListener('change', renderLecturerAttendance);
     document.getElementById('dashboard-master-date')?.addEventListener('change', updateDashboardStats);
@@ -152,31 +155,21 @@ function getFilteredStudents() {
     const search = document.getElementById('attendance-search')?.value.toUpperCase().trim() || '';
 
     return students.filter(s => {
-        const matchStart = start ? s.date >= start : true;
-        const matchEnd = end ? s.date <= end : true;
-        const matchSearch = search ? s.courseCode.toUpperCase().includes(search) : true;
-        return matchStart && matchEnd && matchSearch;
+        return (start ? s.date >= start : true) && (end ? s.date <= end : true) && (search ? s.courseCode.toUpperCase().includes(search) : true);
     });
 }
 
 function getFilteredLecturerRecords() {
     const start = document.getElementById('lecturer-start-date')?.value || '';
     const end = document.getElementById('lecturer-end-date')?.value || '';
-
-    return lecturerAttendanceRecords.filter(r => {
-        const matchStart = start ? r.date >= start : true;
-        const matchEnd = end ? r.date <= end : true;
-        return matchStart && matchEnd;
-    });
+    return lecturerAttendanceRecords.filter(r => (start ? r.date >= start : true) && (end ? r.date <= end : true));
 }
 
 // --- Dashboard Stats & Chart ---
 function updateDashboardStats() {
     const dateStr = document.getElementById('dashboard-master-date')?.value || '';
-
     const uniqueStudents = new Set(students.filter(s => s.date === dateStr).map(s => s.studentId)).size;
     if(document.getElementById('stat-students')) document.getElementById('stat-students').innerText = uniqueStudents;
-    
     document.getElementById('stat-courses').innerText = courses.length;
     document.getElementById('stat-lecturers').innerText = lecturers.length;
     
@@ -191,8 +184,6 @@ function updateDashboardStats() {
 
 function initChart() {
     const ctx = document.getElementById('attendanceChart').getContext('2d');
-    
-    // Check if dark mode is active for initial chart colors
     const isDark = document.documentElement.classList.contains('dark');
     const textColor = isDark ? '#cbd5e1' : '#64748b';
     const legendColor = isDark ? '#f8fafc' : '#475569';
@@ -208,29 +199,21 @@ function initChart() {
             ]
         },
         options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: legendColor } }
-            },
-            scales: { 
-                x: { stacked: true, ticks: { color: textColor } }, 
-                y: { stacked: true, beginAtZero: true, ticks: { color: textColor } } 
-            } 
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: legendColor } } },
+            scales: { x: { stacked: true, ticks: { color: textColor } }, y: { stacked: true, beginAtZero: true, ticks: { color: textColor } } } 
         }
     });
 }
 
 function updateChartDynamically(selectedDateStr) {
     if (!attendanceChartInstance || !selectedDateStr) return;
-
     const dates = [], labels = [], presentCounts = [], lateCounts = [], absentCounts = [];
     const [year, month, day] = selectedDateStr.split('-').map(Number);
     
     for (let i = 4; i >= 0; i--) {
         const d = new Date(year, month - 1, day - i);
         const isoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        
         dates.push(isoDate);
         labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
         
@@ -239,7 +222,6 @@ function updateChartDynamically(selectedDateStr) {
         lateCounts.push(dayRecords.filter(s => s.status === 'late').length);
         absentCounts.push(dayRecords.filter(s => s.status === 'absent').length);
     }
-
     attendanceChartInstance.data.labels = labels;
     attendanceChartInstance.data.datasets[0].data = presentCounts;
     attendanceChartInstance.data.datasets[1].data = lateCounts;
@@ -290,11 +272,7 @@ function renderAttendance() {
     const tbody = document.getElementById('attendance-tbody');
     const filtered = getFilteredStudents();
     tbody.innerHTML = '';
-    
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
-        return;
-    }
+    if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
 
     filtered.forEach(s => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
@@ -316,11 +294,7 @@ function renderLecturerAttendance() {
     const tbody = document.getElementById('lecturer-attendance-tbody');
     const filtered = getFilteredLecturerRecords();
     tbody.innerHTML = '';
-    
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
-        return;
-    }
+    if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
 
     filtered.forEach(r => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
@@ -338,7 +312,7 @@ function renderLecturerAttendance() {
     });
 }
 
-// --- Modals & Database Mutations ---
+// --- Modals & Data Mutations ---
 function populateLecturerDropdown() {
     const sel = document.getElementById('course-lecturer');
     sel.innerHTML = '<option value="" disabled selected>Select a Lecturer</option>';
@@ -355,8 +329,7 @@ function setupFormHandlers() {
 
         if(!lecturerId) return window.showMessage("Please assign a lecturer.", "error");
         try {
-            id ? await updateDoc(doc(db, "courses", id), { code, name, lecturerId }) 
-               : await addDoc(collection(db, "courses"), { code, name, lecturerId });
+            id ? await updateDoc(doc(db, "courses", id), { code, name, lecturerId }) : await addDoc(collection(db, "courses"), { code, name, lecturerId });
             window.showMessage(id ? "Course updated." : "Course added.");
             window.closeModal('course-modal');
         } catch (e) { window.showMessage("Error: " + e.message, "error"); }
@@ -365,15 +338,9 @@ function setupFormHandlers() {
     document.getElementById('lecturer-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('lecturer-id').value;
-        const data = {
-            name: document.getElementById('lecturer-name').value,
-            email: document.getElementById('lecturer-email').value,
-            dept: document.getElementById('lecturer-dept').value
-        };
-
+        const data = { name: document.getElementById('lecturer-name').value, email: document.getElementById('lecturer-email').value, dept: document.getElementById('lecturer-dept').value };
         try {
-            id ? await updateDoc(doc(db, "lecturers", id), data) 
-               : await addDoc(collection(db, "lecturers"), data);
+            id ? await updateDoc(doc(db, "lecturers", id), data) : await addDoc(collection(db, "lecturers"), data);
             window.showMessage(id ? "Lecturer updated." : "Lecturer added.");
             window.closeModal('lecturer-modal');
         } catch (e) { window.showMessage("Error: " + e.message, "error"); }
@@ -383,62 +350,44 @@ function setupFormHandlers() {
 window.editCourse = (id) => {
     const c = courses.find(x => x.id === id);
     if(c) {
-        document.getElementById('course-id').value = c.id;
-        document.getElementById('course-code').value = c.code;
-        document.getElementById('course-name').value = window.toTitleCase(c.name);
-        document.getElementById('course-lecturer').value = c.lecturerId;
-        document.getElementById('course-modal-title').innerText = 'Edit Course';
-        window.openModal('course-modal');
+        document.getElementById('course-id').value = c.id; document.getElementById('course-code').value = c.code;
+        document.getElementById('course-name').value = window.toTitleCase(c.name); document.getElementById('course-lecturer').value = c.lecturerId;
+        document.getElementById('course-modal-title').innerText = 'Edit Course'; window.openModal('course-modal');
     }
 };
 
 window.deleteCourse = async (id) => {
-    try { await deleteDoc(doc(db, "courses", id)); window.showMessage("Course deleted."); } 
-    catch (e) { window.showMessage("Error: " + e.message, "error"); }
+    try { await deleteDoc(doc(db, "courses", id)); window.showMessage("Course deleted."); } catch (e) { window.showMessage("Error: " + e.message, "error"); }
 };
 
 window.editLecturer = (id) => {
     const l = lecturers.find(x => x.id === id);
     if(l) {
-        document.getElementById('lecturer-id').value = l.id;
-        document.getElementById('lecturer-name').value = window.toTitleCase(l.name);
-        document.getElementById('lecturer-email').value = l.email;
-        document.getElementById('lecturer-dept').value = l.dept;
-        document.getElementById('lecturer-modal-title').innerText = 'Edit Lecturer';
-        window.openModal('lecturer-modal');
+        document.getElementById('lecturer-id').value = l.id; document.getElementById('lecturer-name').value = window.toTitleCase(l.name);
+        document.getElementById('lecturer-email').value = l.email; document.getElementById('lecturer-dept').value = l.dept;
+        document.getElementById('lecturer-modal-title').innerText = 'Edit Lecturer'; window.openModal('lecturer-modal');
     }
 };
 
 window.deleteLecturer = async (id) => {
     if(courses.some(c => c.lecturerId === id)) return window.showMessage("Cannot delete: Assigned to active courses.", "error");
-    try { await deleteDoc(doc(db, "lecturers", id)); window.showMessage("Lecturer deleted."); } 
-    catch (e) { window.showMessage("Error: " + e.message, "error"); }
+    try { await deleteDoc(doc(db, "lecturers", id)); window.showMessage("Lecturer deleted."); } catch (e) { window.showMessage("Error: " + e.message, "error"); }
 };
 
-// --- CSV Exports ---
+// --- Exports ---
 window.downloadAttendanceCSV = () => {
     const filtered = getFilteredStudents();
     if (filtered.length === 0) return window.showMessage("No records to download.");
-
     const headers = ['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Stream', 'Status', 'Date', 'Time', 'GPS Coordinates'];
-    const rows = filtered.map(s => [
-        s.studentId, `"${window.toTitleCase(s.name)}"`, s.level, s.courseCode.toUpperCase(),
-        `"${window.toTitleCase(s.courseName)}"`, s.stream || '-', s.status.toUpperCase(), s.date, s.time, `"${s.gps}"`
-    ].join(','));
-
+    const rows = filtered.map(s => [s.studentId, `"${window.toTitleCase(s.name)}"`, s.level, s.courseCode.toUpperCase(), `"${window.toTitleCase(s.courseName)}"`, s.stream || '-', s.status.toUpperCase(), s.date, s.time, `"${s.gps}"`].join(','));
     triggerDownload([headers.join(','), ...rows].join('\n'), `student_attendance.csv`);
 };
 
 window.downloadLecturerAttendanceCSV = () => {
     const filtered = getFilteredLecturerRecords();
     if (filtered.length === 0) return window.showMessage("No records to download.");
-
     const headers = ['Lecturer Name', 'Course Code', 'Course Name', 'Date', 'Time', 'GPS Coordinates', 'Status'];
-    const rows = filtered.map(r => [
-        `"${window.toTitleCase(r.name)}"`, r.courseCode.toUpperCase(), `"${window.toTitleCase(r.courseName)}"`,
-        r.date, r.time, `"${r.gps}"`, r.status.toUpperCase()
-    ].join(','));
-
+    const rows = filtered.map(r => [`"${window.toTitleCase(r.name)}"`, r.courseCode.toUpperCase(), `"${window.toTitleCase(r.courseName)}"`, r.date, r.time, `"${r.gps}"`, r.status.toUpperCase()].join(','));
     triggerDownload([headers.join(','), ...rows].join('\n'), `lecturer_attendance.csv`);
 };
 
