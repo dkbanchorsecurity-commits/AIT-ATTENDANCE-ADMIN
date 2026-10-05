@@ -80,17 +80,15 @@ function initPWA() {
 // --- Real-Time Listeners ---
 onSnapshot(collection(db, "lecturers"), (snapshot) => {
     lecturers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // --- NEW: Alphabetical Sorting ---
-    // Sorts the lecturers by name (ignoring case) before rendering
     lecturers.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-    
     renderLecturers();
     populateLecturerDropdown();
 });
 
 onSnapshot(collection(db, "courses"), (snapshot) => {
     courses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort courses alphabetically by course code
+    courses.sort((a, b) => a.code.localeCompare(b.code, undefined, { sensitivity: 'base' }));
     renderCourses();
 });
 
@@ -357,6 +355,16 @@ function setupFormHandlers() {
         const lecturerId = document.getElementById('course-lecturer').value;
 
         if(!lecturerId) return window.showMessage("Please assign a lecturer.", "error");
+
+        // --- NEW: Check for duplicate course codes ---
+        const isDuplicateCourse = courses.some(c => 
+            c.code.toUpperCase() === code && c.id !== id
+        );
+
+        if (isDuplicateCourse) {
+            return window.showMessage("A course with this code already exists.", "error");
+        }
+
         try {
             id ? await updateDoc(doc(db, "courses", id), { code, name, lecturerId }) : await addDoc(collection(db, "courses"), { code, name, lecturerId });
             window.showMessage(id ? "Course updated." : "Course added.");
