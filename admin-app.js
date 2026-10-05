@@ -144,6 +144,9 @@ function setupFilters() {
     document.getElementById('attendance-start-date')?.addEventListener('change', renderAttendance);
     document.getElementById('attendance-end-date')?.addEventListener('change', renderAttendance);
     document.getElementById('attendance-search')?.addEventListener('input', renderAttendance);
+    
+    document.getElementById('lecturer-search')?.addEventListener('input', renderLecturers);
+    
     document.getElementById('lecturer-start-date')?.addEventListener('change', renderLecturerAttendance);
     document.getElementById('lecturer-end-date')?.addEventListener('change', renderLecturerAttendance);
     document.getElementById('dashboard-master-date')?.addEventListener('change', updateDashboardStats);
@@ -163,6 +166,13 @@ function getFilteredLecturerRecords() {
     const start = document.getElementById('lecturer-start-date')?.value || '';
     const end = document.getElementById('lecturer-end-date')?.value || '';
     return lecturerAttendanceRecords.filter(r => (start ? r.date >= start : true) && (end ? r.date <= end : true));
+}
+
+function getFilteredLecturers() {
+    const search = document.getElementById('lecturer-search')?.value.toLowerCase().trim() || '';
+    return lecturers.filter(l => {
+        return search ? (l.name.toLowerCase().includes(search) || l.email.toLowerCase().includes(search)) : true;
+    });
 }
 
 // --- Dashboard Stats & Chart ---
@@ -250,8 +260,15 @@ function renderCourses() {
 
 function renderLecturers() {
     const tbody = document.getElementById('lecturers-tbody');
+    const filtered = getFilteredLecturers();
     tbody.innerHTML = '';
-    lecturers.forEach(l => {
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-solid fa-user-xmark text-3xl mb-3 text-slate-300 block"></i> No lecturers found.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(l => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
             <td class="px-6 py-4 flex items-center gap-3">
                 <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(window.toTitleCase(l.name))}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full">
@@ -263,6 +280,7 @@ function renderLecturers() {
                 <button class="text-red-500 hover:text-red-700" onclick="deleteLecturer('${l.id}')"><i class="fa-solid fa-trash"></i></button>
             </td></tr>`);
     });
+    
     updateDashboardStats();
     populateLecturerDropdown();
 }
@@ -344,12 +362,18 @@ function setupFormHandlers() {
         const inputName = document.getElementById('lecturer-name').value.trim();
         const inputEmail = document.getElementById('lecturer-email').value.trim();
         
-        // --- Prevent Duplication Logic ---
-        const isDuplicate = lecturers.some(l => 
+        // --- NEW: Check for duplicate emails AND duplicate names ---
+        const isDuplicateEmail = lecturers.some(l => 
+            l.email.toLowerCase() === inputEmail.toLowerCase() && l.id !== id
+        );
+        const isDuplicateName = lecturers.some(l => 
             l.name.toLowerCase() === inputName.toLowerCase() && l.id !== id
         );
 
-        if (isDuplicate) {
+        if (isDuplicateEmail) {
+            return window.showMessage("A lecturer with this email already exists.", "error");
+        }
+        if (isDuplicateName) {
             return window.showMessage("A lecturer with this name already exists.", "error");
         }
 
