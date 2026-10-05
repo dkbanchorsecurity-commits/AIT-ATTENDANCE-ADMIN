@@ -272,7 +272,9 @@ function renderAttendance() {
     const tbody = document.getElementById('attendance-tbody');
     const filtered = getFilteredStudents();
     tbody.innerHTML = '';
-    if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
+    
+    // Updated colspan to 11 to match new layout with Hall
+    if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="11" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
 
     filtered.forEach(s => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
@@ -281,6 +283,7 @@ function renderAttendance() {
             <td class="px-6 py-4">${s.level}</td>
             <td class="px-6 py-4 font-medium">${s.courseCode.toUpperCase()}</td>
             <td class="px-6 py-4">${window.toTitleCase(s.courseName)}</td>
+            <td class="px-6 py-4 font-medium">${s.hall || '-'}</td>
             <td class="px-6 py-4 font-medium">${s.stream || '-'}</td>
             <td class="px-6 py-4">${s.date}</td>
             <td class="px-6 py-4">${s.time}</td>
@@ -294,7 +297,9 @@ function renderLecturerAttendance() {
     const tbody = document.getElementById('lecturer-attendance-tbody');
     const filtered = getFilteredLecturerRecords();
     tbody.innerHTML = '';
-    if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
+    
+    // Updated colspan to 8 to match new layout with Hall
+    if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
 
     filtered.forEach(r => {
         tbody.insertAdjacentHTML('beforeend', `<tr>
@@ -304,6 +309,7 @@ function renderLecturerAttendance() {
             </td>
             <td class="px-6 py-4 font-medium">${r.courseCode.toUpperCase()}</td>
             <td class="px-6 py-4">${window.toTitleCase(r.courseName)}</td>
+            <td class="px-6 py-4 font-medium">${r.hall || '-'}</td>
             <td class="px-6 py-4">${r.date}</td>
             <td class="px-6 py-4">${r.time}</td>
             <td class="px-6 py-4 font-mono text-xs">${window.getGpsLink(r.gps)}</td>
@@ -378,16 +384,43 @@ window.deleteLecturer = async (id) => {
 window.downloadAttendanceCSV = () => {
     const filtered = getFilteredStudents();
     if (filtered.length === 0) return window.showMessage("No records to download.");
-    const headers = ['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Stream', 'Status', 'Date', 'Time', 'GPS Coordinates'];
-    const rows = filtered.map(s => [s.studentId, `"${window.toTitleCase(s.name)}"`, s.level, s.courseCode.toUpperCase(), `"${window.toTitleCase(s.courseName)}"`, s.stream || '-', s.status.toUpperCase(), s.date, s.time, `"${s.gps}"`].join(','));
+    
+    // Updated CSV Headers and Mapping to include Hall
+    const headers = ['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Hall', 'Stream', 'Status', 'Date', 'Time', 'GPS Coordinates'];
+    const rows = filtered.map(s => [
+        s.studentId, 
+        `"${window.toTitleCase(s.name)}"`, 
+        s.level, 
+        s.courseCode.toUpperCase(), 
+        `"${window.toTitleCase(s.courseName)}"`, 
+        s.hall || '-', 
+        s.stream || '-', 
+        s.status.toUpperCase(), 
+        s.date, 
+        s.time, 
+        `"${s.gps}"`
+    ].join(','));
+    
     triggerDownload([headers.join(','), ...rows].join('\n'), `student_attendance.csv`);
 };
 
 window.downloadLecturerAttendanceCSV = () => {
     const filtered = getFilteredLecturerRecords();
     if (filtered.length === 0) return window.showMessage("No records to download.");
-    const headers = ['Lecturer Name', 'Course Code', 'Course Name', 'Date', 'Time', 'GPS Coordinates', 'Status'];
-    const rows = filtered.map(r => [`"${window.toTitleCase(r.name)}"`, r.courseCode.toUpperCase(), `"${window.toTitleCase(r.courseName)}"`, r.date, r.time, `"${r.gps}"`, r.status.toUpperCase()].join(','));
+    
+    // Updated CSV Headers and Mapping to include Hall
+    const headers = ['Lecturer Name', 'Course Code', 'Course Name', 'Hall', 'Date', 'Time', 'GPS Coordinates', 'Status'];
+    const rows = filtered.map(r => [
+        `"${window.toTitleCase(r.name)}"`, 
+        r.courseCode.toUpperCase(), 
+        `"${window.toTitleCase(r.courseName)}"`, 
+        r.hall || '-', 
+        r.date, 
+        r.time, 
+        `"${r.gps}"`, 
+        r.status.toUpperCase()
+    ].join(','));
+    
     triggerDownload([headers.join(','), ...rows].join('\n'), `lecturer_attendance.csv`);
 };
 
