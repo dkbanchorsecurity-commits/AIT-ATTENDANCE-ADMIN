@@ -80,18 +80,26 @@ function initPWA() {
 // --- Real-Time Listeners ---
 onSnapshot(collection(db, "lecturers"), (snapshot) => {
     lecturers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // --- NEW: Alphabetical Sorting ---
+    // Sorts the lecturers by name (ignoring case) before rendering
+    lecturers.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    
     renderLecturers();
     populateLecturerDropdown();
 });
+
 onSnapshot(collection(db, "courses"), (snapshot) => {
     courses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderCourses();
 });
+
 onSnapshot(collection(db, "student_attendance"), (snapshot) => {
     students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderAttendance();
     updateDashboardStats();
 });
+
 onSnapshot(collection(db, "lecturer_attendance"), (snapshot) => {
     lecturerAttendanceRecords = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderLecturerAttendance();
@@ -362,7 +370,6 @@ function setupFormHandlers() {
         const inputName = document.getElementById('lecturer-name').value.trim();
         const inputEmail = document.getElementById('lecturer-email').value.trim();
         
-        // --- NEW: Check for duplicate emails AND duplicate names ---
         const isDuplicateEmail = lecturers.some(l => 
             l.email.toLowerCase() === inputEmail.toLowerCase() && l.id !== id
         );
