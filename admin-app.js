@@ -341,7 +341,19 @@ function setupFormHandlers() {
     document.getElementById('lecturer-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('lecturer-id').value;
-        const data = { name: document.getElementById('lecturer-name').value, email: document.getElementById('lecturer-email').value };
+        const inputName = document.getElementById('lecturer-name').value.trim();
+        const inputEmail = document.getElementById('lecturer-email').value.trim();
+        
+        // --- Prevent Duplication Logic ---
+        const isDuplicate = lecturers.some(l => 
+            l.name.toLowerCase() === inputName.toLowerCase() && l.id !== id
+        );
+
+        if (isDuplicate) {
+            return window.showMessage("A lecturer with this name already exists.", "error");
+        }
+
+        const data = { name: inputName, email: inputEmail };
         try {
             id ? await updateDoc(doc(db, "lecturers", id), data) : await addDoc(collection(db, "lecturers"), data);
             window.showMessage(id ? "Lecturer updated." : "Lecturer added.");
