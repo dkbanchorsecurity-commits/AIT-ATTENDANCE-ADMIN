@@ -257,7 +257,6 @@ function renderLecturers() {
                 <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(window.toTitleCase(l.name))}&background=e2e8f0&color=475569" class="w-8 h-8 rounded-full">
                 <span class="font-medium">${window.toTitleCase(l.name)}</span>
             </td>
-            <td class="px-6 py-4">${window.toTitleCase(l.dept)}</td>
             <td class="px-6 py-4">${l.email}</td>
             <td class="px-6 py-4 text-right">
                 <button class="text-blue-600 hover:text-blue-800 mr-4" onclick="editLecturer('${l.id}')"><i class="fa-solid fa-pen"></i></button>
@@ -273,7 +272,6 @@ function renderAttendance() {
     const filtered = getFilteredStudents();
     tbody.innerHTML = '';
     
-    // Updated colspan to 11 to match new layout with Hall
     if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="11" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
 
     filtered.forEach(s => {
@@ -298,7 +296,6 @@ function renderLecturerAttendance() {
     const filtered = getFilteredLecturerRecords();
     tbody.innerHTML = '';
     
-    // Updated colspan to 8 to match new layout with Hall
     if (filtered.length === 0) return tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500 bg-white"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-slate-300 block"></i> No records found.</td></tr>`;
 
     filtered.forEach(r => {
@@ -322,7 +319,7 @@ function renderLecturerAttendance() {
 function populateLecturerDropdown() {
     const sel = document.getElementById('course-lecturer');
     sel.innerHTML = '<option value="" disabled selected>Select a Lecturer</option>';
-    lecturers.forEach(l => sel.innerHTML += `<option value="${l.id}">${window.toTitleCase(l.name)} (${window.toTitleCase(l.dept)})</option>`);
+    lecturers.forEach(l => sel.innerHTML += `<option value="${l.id}">${window.toTitleCase(l.name)}</option>`);
 }
 
 function setupFormHandlers() {
@@ -344,7 +341,7 @@ function setupFormHandlers() {
     document.getElementById('lecturer-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('lecturer-id').value;
-        const data = { name: document.getElementById('lecturer-name').value, email: document.getElementById('lecturer-email').value, dept: document.getElementById('lecturer-dept').value };
+        const data = { name: document.getElementById('lecturer-name').value, email: document.getElementById('lecturer-email').value };
         try {
             id ? await updateDoc(doc(db, "lecturers", id), data) : await addDoc(collection(db, "lecturers"), data);
             window.showMessage(id ? "Lecturer updated." : "Lecturer added.");
@@ -370,7 +367,7 @@ window.editLecturer = (id) => {
     const l = lecturers.find(x => x.id === id);
     if(l) {
         document.getElementById('lecturer-id').value = l.id; document.getElementById('lecturer-name').value = window.toTitleCase(l.name);
-        document.getElementById('lecturer-email').value = l.email; document.getElementById('lecturer-dept').value = l.dept;
+        document.getElementById('lecturer-email').value = l.email; 
         document.getElementById('lecturer-modal-title').innerText = 'Edit Lecturer'; window.openModal('lecturer-modal');
     }
 };
@@ -385,7 +382,6 @@ window.downloadAttendanceCSV = () => {
     const filtered = getFilteredStudents();
     if (filtered.length === 0) return window.showMessage("No records to download.");
     
-    // Updated CSV Headers and Mapping to include Hall
     const headers = ['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Hall', 'Stream', 'Status', 'Date', 'Time', 'GPS Coordinates'];
     const rows = filtered.map(s => [
         s.studentId, 
@@ -408,7 +404,6 @@ window.downloadLecturerAttendanceCSV = () => {
     const filtered = getFilteredLecturerRecords();
     if (filtered.length === 0) return window.showMessage("No records to download.");
     
-    // Updated CSV Headers and Mapping to include Hall
     const headers = ['Lecturer Name', 'Course Code', 'Course Name', 'Hall', 'Date', 'Time', 'GPS Coordinates', 'Status'];
     const rows = filtered.map(r => [
         `"${window.toTitleCase(r.name)}"`, 
